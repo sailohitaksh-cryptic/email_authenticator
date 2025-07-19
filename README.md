@@ -65,7 +65,7 @@ Follow these instructions to set up and run the project on a local development m
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/sailohitaksh-cryptic/email_sender_app.git](https://github.com/sailohitaksh-cryptic/email_sender_app.git)
+    git clone https://github.com/sailohitaksh-cryptic/email_sender_app.git
     cd email_sender_app
     ```
 
