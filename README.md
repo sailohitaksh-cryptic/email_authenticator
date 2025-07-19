@@ -6,13 +6,7 @@ A secure and interactive web application demonstrating a complete two-step email
 
 ## 🚀 Live Demo
 
-The following demonstration showcases the application's multi-step user flow, from entering an email to successful verification with the animated checkmark.
-
-*(**Action Required**: To embed your demo, convert your video to an animated GIF using a tool like [Ezgif](https://ezgif.com/video-to-gif). Upload the GIF to your repository and replace `demo.gif` in the line below with your file's name.)*
-
-![Application Demo](demo.gif)
-
-A link to the full video can also be provided here: [Full Demo Video](./demo_video.mp4)
+https://github.com/sailohitaksh-cryptic/email_authenticator/blob/46aeb7036a2b9adc5d55014dc72d034f77a84bb4/Demo%20Video.mp4
 
 ---
 
