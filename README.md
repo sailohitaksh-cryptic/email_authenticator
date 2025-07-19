@@ -49,7 +49,7 @@ The application follows a standard client-server architecture. The user interact
 
 *(**Action Required**: Upload your flowchart image to the repository and update the filename below.)*
 
-![Application Flowchart](professional_application_flowchart.png)
+![Application Flowchart](Professional Application Flowchart.png)
 
 ---
 
