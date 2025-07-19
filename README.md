@@ -6,7 +6,11 @@ A secure and interactive web application demonstrating a complete two-step email
 
 ## 🚀 Live Demo
 
-https://github.com/sailohitaksh-cryptic/email_authenticator/blob/46aeb7036a2b9adc5d55014dc72d034f77a84bb4/Demo%20Video.mp4
+
+https://github.com/user-attachments/assets/ec3c1dfd-d425-4e3f-82ad-7c2ca96f5def
+
+
+
 
 ---
 
