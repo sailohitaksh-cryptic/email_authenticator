@@ -47,9 +47,8 @@ A link to the full video can also be provided here: [Full Demo Video](./demo_vid
 
 The application follows a standard client-server architecture. The user interacts with the AngularJS frontend, which communicates with the Node.js backend via a REST API. The backend then processes the request, interacts with the MySQL database, and sends an email through the Ethereal SMTP service.
 
-*(**Action Required**: Upload your flowchart image to the repository and update the filename below.)*
 
-![Application Flowchart](Professional Application Flowchart.png)
+![Professional Application Flowchart.png](https://github.com/sailohitaksh-cryptic/email_sender_app/blob/main/Professional%20Application%20Flowchart.png)
 
 ---
 
