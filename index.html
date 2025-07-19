@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="emailApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Subscription</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="MainController">
+
+    <div class="container">
+        <h1>Subscribe to our Newsletter</h1>
+        <form name="subscribeForm" ng-submit="subscribeForm.$valid && subscribe()" novalidate>
+            
+            <input 
+                type="text" 
+                name="userName"
+                ng-model="user.name" 
+                placeholder="Name" 
+                required
+                ng-class="{'input-error': subscribeForm.userName.$touched && subscribeForm.userName.$invalid}">
+
+            <input 
+                type="email" 
+                name="userEmail"
+                ng-model="user.email" 
+                placeholder="Email Address" 
+                required
+                ng-class="{'input-error': subscribeForm.userEmail.$touched && subscribeForm.userEmail.$invalid}">
+
+            <button 
+                type="submit" 
+                ng-disabled="subscribeForm.$invalid"
+                ng-class="{'btn-ready': subscribeForm.$valid}">
+                Subscribe
+            </button>
+
+        </form>
+        <div ng-if="responseMessage" class="message" ng-class="{'success': isSuccess, 'error': !isSuccess}">
+            {{ responseMessage }}
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
