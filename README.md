@@ -48,7 +48,7 @@ The application follows a client-server model designed for authentication. The u
 
 *(**Action Required**: Upload the `authenticator_flowchart.png` file to your repository and update the filename below if needed.)*
 
-![Application Flowchart](authenticator_flowchart.png)
+[![Application Flowchart](authenticator_flowchart.png)](https://github.com/sailohitaksh-cryptic/email_sender_app/blob/main/Authenticator%20Flowchart.png)
 
 ---
 
