@@ -22,7 +22,7 @@ app.controller('AuthController', function($scope, $http, $interval) {
             if ($scope.resendTimer <= 0) {
                 $interval.cancel(countdownInterval);
             }
-        }, 1000, 10); // Run 10 times (for 10 seconds)
+        }, 1000, 15); // Run 10 times (for 15 seconds)
     }
 
     // --- Step 1: Send the verification code ---
