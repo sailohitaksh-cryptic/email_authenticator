@@ -1,43 +1,64 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="emailApp">
+<html lang="en" ng-app="authApp">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Subscription</title>
+    <title>Email Authenticator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
 </head>
-<body ng-controller="MainController">
+<body ng-controller="AuthController">
 
     <div class="container">
-        <h1>Subscribe to our Newsletter</h1>
-        <form name="subscribeForm" ng-submit="subscribeForm.$valid && subscribe()" novalidate>
-            
-            <input 
-                type="text" 
-                name="userName"
-                ng-model="user.name" 
-                placeholder="Name" 
-                required
-                ng-class="{'input-error': subscribeForm.userName.$touched && subscribeForm.userName.$invalid}">
+        <div ng-if="viewState === 'enterEmail'">
+            <h1>Email Authenticator</h1>
+            <p>Enter your email address to receive a verification code.</p>
+            <form name="emailForm" ng-submit="sendCode()" novalidate>
+                <input 
+                    type="email" 
+                    name="userEmail"
+                    ng-model="user.email" 
+                    placeholder="your-email@example.com" 
+                    required>
+                <button type="submit" ng-disabled="emailForm.$invalid">Send Code</button>
+            </form>
+        </div>
 
-            <input 
-                type="email" 
-                name="userEmail"
-                ng-model="user.email" 
-                placeholder="Email Address" 
-                required
-                ng-class="{'input-error': subscribeForm.userEmail.$touched && subscribeForm.userEmail.$invalid}">
+        <div ng-if="viewState === 'enterCode'">
+            <h1>Check Your Email</h1>
+            <p>A verification code was sent to <strong>{{ user.email }}</strong>.</p>
+            <form name="codeForm" ng-submit="verifyCode()" novalidate>
+                <input 
+                    type="text" 
+                    name="verificationCode"
+                    ng-model="user.code"
+                    placeholder="Enter your 16-character code"
+                    required
+                    maxlength="16">
+                <button type="submit" ng-disabled="codeForm.$invalid">Verify</button>
+            </form>
+             <button class="link-button" ng-click="resendCode()" ng-disabled="resendTimer > 0">
+                Resend code {{ resendTimer > 0 ? '(' + resendTimer + ')' : '' }}
+             </button>
+        </div>
 
-            <button 
-                type="submit" 
-                ng-disabled="subscribeForm.$invalid"
-                ng-class="{'btn-ready': subscribeForm.$valid}">
-                Subscribe
-            </button>
+        <div ng-if="viewState === 'success'">
+            <div class="success-checkmark">
+                <div class="checkmark-stem"></div>
+                <div class="checkmark-kick"></div>
+            </div>
+            <h1>Authenticated!</h1>
+            <p>{{ responseMessage }}</p>
+            <button ng-click="resetView()">Authenticate Another Email</button>
+        </div>
 
-        </form>
-        <div ng-if="responseMessage" class="message" ng-class="{'success': isSuccess, 'error': !isSuccess}">
+        <div ng-if="responseMessage && !isSuccess" class="message error">
             {{ responseMessage }}
         </div>
     </div>

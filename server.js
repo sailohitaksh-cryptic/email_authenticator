@@ -1,101 +1,103 @@
-// server.js
+// server.js (Email Authenticator)
+require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2/promise');
+const crypto = require('crypto'); // Built-in Node.js module for cryptography
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+// --- In-Memory Store for Verification Codes ---
+// In a production app, you would use a database (like Redis or MySQL) for this.
+const verificationCodes = new Map();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// MySQL Connection Pool
-const dbPool = mysql.createPool({
-    host: 'localhost', // or your MySQL host
-    user: 'root',      // your MySQL username
-    password: 'cryptic', // your MySQL password
-    database: 'email_system'
+// Nodemailer Transporter Setup for Gmail
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
 });
 
-// Nodemailer Transporter Setup with Ethereal
-async function setupNodemailer() {
-    // Create a test account with Ethereal
-    let testAccount = await nodemailer.createTestAccount();
+console.log(`📧 Nodemailer configured to send emails from: ${process.env.EMAIL_USER}`);
 
-    console.log("Ethereal test account created:");
-    console.log("User: %s", testAccount.user);
-    console.log("Password: %s", testAccount.pass);
-    console.log("------------------------------------");
-
-
-    // Create a transporter object using the SMTP transport
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: testAccount.user, // generated ethereal user
-            pass: testAccount.pass, // generated ethereal password
-        },
-    });
-    return transporter;
-}
-
-// Main API Route
-app.post('/api/subscribe', async (req, res) => {
-    const { name, email } = req.body;
-
-    if (!name || !email) {
-        return res.status(400).json({ message: 'Name and email are required.' });
+// --- API Endpoint to Send Verification Code ---
+app.post('/api/send-code', async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: 'Email address is required.' });
     }
+
+    // 1. Generate a secure, random 16-character code
+    const code = crypto.randomBytes(8).toString('hex').toUpperCase();
+
+    // 2. Store the code and a timestamp (valid for 10 minutes)
+    const expiration = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+    verificationCodes.set(email, { code, expiration });
+
+    console.log(`Generated code ${code} for ${email}. It expires at ${new Date(expiration).toLocaleTimeString()}.`);
+
+    // 3. Send the code to the user's email
+    const mailOptions = {
+        from: `"Your App Authentication" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Your Verification Code',
+        html: `
+            <h1>Email Verification</h1>
+            <p>Hello,</p>
+            <p>Your verification code is:</p>
+            <h2 style="text-align:center; letter-spacing: 2px; color: #333;">${code}</h2>
+            <p>This code is valid for 10 minutes. Please enter it on the verification page.</p>
+            <p>The email address this was sent to is: <b>${email}</b>.</p>
+        `
+    };
 
     try {
-        // 1. Store user in the database
-        const connection = await dbPool.getConnection();
-        const [result] = await connection.execute(
-            'INSERT INTO users (name, email) VALUES (?, ?)',
-            [name, email]
-        );
-        connection.release();
-        console.log(`User ${name} with email ${email} saved to database.`);
-
-        // 2. Send confirmation email
-        const transporter = await setupNodemailer();
-        const mailOptions = {
-            from: '"Your App Name" <no-reply@yourapp.com>',
-            to: email, // The user's email address
-            subject: '✅ Confirmation: Welcome!',
-            html: `
-                <h1>Hi ${name}!</h1>
-                <p>Thank you for subscribing.</p>
-                <p>We have successfully registered your email address: <b>${email}</b>.</p>
-                <p>Best regards,<br>The Team</p>
-            `
-        };
-
-        let info = await transporter.sendMail(mailOptions);
-        console.log('Message sent: %s', info.messageId);
-        // Log the URL to preview the sent email in the Ethereal inbox
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        res.status(200).json({ 
-            message: 'Subscription successful! Please check your email for confirmation.',
-            previewURL: nodemailer.getTestMessageUrl(info) 
-        });
-
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Verification code sent successfully.' });
     } catch (error) {
-        console.error('Error:', error);
-        // Check for duplicate entry error
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ message: 'This email address is already subscribed.' });
-        }
-        res.status(500).json({ message: 'An internal server error occurred.' });
+        console.error('Error sending email:', error);
+        res.status(500).json({ message: 'Failed to send verification code.' });
     }
 });
+
+// --- API Endpoint to Verify the Code ---
+app.post('/api/verify-code', (req, res) => {
+    const { email, code } = req.body;
+    if (!email || !code) {
+        return res.status(400).json({ message: 'Email and code are required.' });
+    }
+
+    const storedData = verificationCodes.get(email);
+
+    // Check 1: Is there a code for this email?
+    if (!storedData) {
+        return res.status(400).json({ message: 'Invalid request. Please request a new code.' });
+    }
+
+    // Check 2: Has the code expired?
+    if (Date.now() > storedData.expiration) {
+        verificationCodes.delete(email); // Clean up expired code
+        return res.status(400).json({ message: 'Your verification code has expired. Please request a new one.' });
+    }
+
+    // Check 3: Does the code match?
+    if (storedData.code === code.toUpperCase()) {
+        verificationCodes.delete(email); // Code is used, delete it
+        return res.status(200).json({ message: '✅ Email successfully authenticated!' });
+    } else {
+        return res.status(400).json({ message: 'Invalid code. Please try again.' });
+    }
+});
+
 
 // Start the server
 app.listen(port, () => {
