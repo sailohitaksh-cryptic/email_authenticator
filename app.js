@@ -1,9 +1,9 @@
-// app.js (Auth App with Enhanced UX)
+// app.js (Auth App)
 const app = angular.module('authApp', []);
 
 app.controller('AuthController', function($scope, $http, $interval) {
     // --- Scope Variables ---
-    $scope.viewState = 'enterEmail'; // Can be 'enterEmail', 'enterCode', or 'success'
+    $scope.viewState = 'enterEmail'; 
     $scope.user = {};
     $scope.responseMessage = '';
     $scope.isSuccess = false;
@@ -22,7 +22,7 @@ app.controller('AuthController', function($scope, $http, $interval) {
             if ($scope.resendTimer <= 0) {
                 $interval.cancel(countdownInterval);
             }
-        }, 1000, 15); // Run 10 times (for 15 seconds)
+        }, 1000, 15); 
     }
 
     // --- Step 1: Send the verification code ---
@@ -30,7 +30,6 @@ app.controller('AuthController', function($scope, $http, $interval) {
         $scope.responseMessage = ''; // Clear previous message
         $http.post('http://localhost:3000/api/send-code', { email: $scope.user.email })
             .then(function(response) {
-                // On success, switch to the code entry view and start the timer
                 $scope.viewState = 'enterCode';
                 $scope.isSuccess = true;
                 $scope.responseMessage = response.data.message;
