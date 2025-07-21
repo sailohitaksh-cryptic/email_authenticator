@@ -1,7 +1,7 @@
 // server.js (Email Authenticator)
 require('dotenv').config();
 const express = require('express');
-const crypto = require('crypto'); // Built-in Node.js module for cryptography
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -9,8 +9,7 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// --- In-Memory Store for Verification Codes ---
-// In a production app, you would use a database (like Redis or MySQL) for this.
+// --- In-Memory Store for Verification Codes 
 const verificationCodes = new Map();
 
 // Middleware
@@ -40,7 +39,7 @@ app.post('/api/send-code', async (req, res) => {
     const code = crypto.randomBytes(8).toString('hex').toUpperCase();
 
     // 2. Store the code and a timestamp (valid for 10 minutes)
-    const expiration = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+    const expiration = Date.now() + 10 * 60 * 1000; 
     verificationCodes.set(email, { code, expiration });
 
     console.log(`Generated code ${code} for ${email}. It expires at ${new Date(expiration).toLocaleTimeString()}.`);
